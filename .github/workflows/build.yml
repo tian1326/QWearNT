@@ -30,7 +30,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: 运行 Gradle hookapk 任务
-        run: ./gradlew hookapk
+        run: ./gradlew --no-daemon hookapk
 
       - name: 打包未签名的 APK 文件
         run: |
