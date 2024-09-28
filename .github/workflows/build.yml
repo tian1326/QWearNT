@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '17'
+          distribution: 'zulu'
 
       - name: 创建 apkhook 目录并下载 Apktool
         run: |
