@@ -1,0 +1,48 @@
+name: 构建 QWearNT 并发布
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v2
+
+      - name: 设置 JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: 创建 apkhook 目录并下载 Apktool
+        run: |
+          mkdir -p app/src/main/apkhook
+          curl -L -o app/src/main/apkhook/apktool.jar https://raw.githubusercontent.com/iBotPeaches/Apktool/master/brut.apktool/apktool-cli/build/libs/apktool.jar
+          # 在此处解包 Apktool 的产物并放入 apkhook
+
+      - name: 给予 Gradle 权限
+        run: chmod +x gradlew
+
+      - name: 运行 Gradle hookapk 任务
+        run: ./gradlew hookapk
+
+      - name: 打包未签名的 APK 文件
+        run: |
+          mkdir -p app/hook
+          cp app/hook/*.apk release/
+
+      - name: 创建 GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: app/hook/*.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.sha }}
+          name: Release ${{ github.sha }}
+          body: 构建生成的未签名 APK 文件
+          draft: false
+          prerelease: false
